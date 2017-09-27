@@ -1,0 +1,15 @@
+*.iml
+.idea/
+.DS_Store
+.project
+.*proj
+.svn/
+node_modules/
+.buildpath
+.settings
+npm-debug.log
+nohup.out
+build
+/.vscode/
+src/**/*.jsx
+src/**/*.js
