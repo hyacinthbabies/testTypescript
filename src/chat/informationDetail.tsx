@@ -3,7 +3,6 @@ import Card from "../component/card";
 import {request,ApiError,ApiResponse} from "../utils/api";
 import {ICardInfo} from '../interface/cardInfo';
 import {getInfoDetailById} from "./funcApi";
-import Test from "./testJs";
 class Detail extends React.Component<any, any> {
     constructor(props:any){
         super(props);
@@ -32,7 +31,6 @@ class Detail extends React.Component<any, any> {
     return (
         <div>
             <div>这里是详情页</div>
-            <Test/>
             {
                 dataDetail?
                      <Card cardInfo={dataDetail} goDelete={this.delInfo.bind(this)}/>

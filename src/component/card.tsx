@@ -6,10 +6,8 @@ interface ICardList{
     cardInfo:ICardInfo;
     goDelete?:<T>(message:T)=>void;
 }
-interface appState{
 
-}
-class Card extends React.Component<ICardList, appState> {
+class Card extends React.Component<ICardList, any> {
     constructor(props:any){
         super(props);
         this.state = {
