@@ -1,39 +1,53 @@
-
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 const config = {
-  entry: './src/index.tsx',
+  entry: "./src/index.js",
   output: {
-    filename: 'bundle.js',
-    path: __dirname + '/build'
+    publicPath: "/",
+    filename: "bundle.js",
+    path: __dirname + "/build"
   },
   resolve: {
-    extensions: ['.webpack.js', '.web.js', '.ts', '.tsx', '.js']
+    extensions: [".webpack.js", ".js"],
+    modules: ["node_modules", "web_modules"]
   },
   module: {
-    loaders: [
+    rules: [
       {
-        test: /\.tsx?$/,
-        loader: 'ts-loader'
-      },
-        {
-          test: /\.js$/,
-            loaders: ['babel-loader?cacheDirectory'], exclude: /node_modules/
+        test: /\.js?$/,
+        use: {
+          loader: "babel-loader"
         },
+        exclude: /node_modules/,
+        include: [path.resolve(__dirname, "src")]
+      },
       {
-        enforce: 'pre',
-        test: '/\.js$/',
-        loader: 'source-map-loader'
+        enforce: "pre",
+        test: "/.js$/",
+        loader: "source-map-loader"
+      },
+      {
+        test: /\.(jpg|png|gif|svg|woff|eot|ttf)\??.*$/,
+        loader: "url-loader?limit=100000"
+      },
+      {
+        test: /\.less$/,
+        use: ["style-loader", "css-loader", "less-loader"]
+      },
+      {
+        test: /\.css/,
+        use: ["style-loader", "css-loader"]
       }
     ]
   },
-  devtool: 'source-map',
+  devtool: "source-map",
   plugins: [
     new HtmlWebpackPlugin({
-      title: 'test',
-      chunksSortMode: 'dependency',
-      template: './index.html'
+      title: "test",
+      chunksSortMode: "dependency",
+      template: "./index.html"
     })
   ]
-}
+};
 
-module.exports = config
+module.exports = config;
