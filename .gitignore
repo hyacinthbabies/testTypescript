@@ -12,4 +12,3 @@ nohup.out
 build
 /.vscode/
 src/**/*.jsx
-src/**/*.js
