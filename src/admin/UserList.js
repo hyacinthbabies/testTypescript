@@ -1,9 +1,10 @@
 import React from "react";
-import { Table, Divider, message } from "antd";
+import { Table, Divider, message, Select, Modal, Checkbox } from "antd";
 import ApiUtil from "utils/api";
 import { Auth } from "component/Authority";
 import Permission from "utils/permission";
-
+const CheckboxGroup = Checkbox.Group;
+const Option = Select.Option;
 class UserList extends React.Component {
   constructor(props) {
     super(props);
@@ -22,7 +23,20 @@ class UserList extends React.Component {
       },
       {
         title: "角色",
-        dataIndex: "addUserName"
+        dataIndex: "roleId",
+        render(text) {
+          return (
+            <Select
+              defaultValue={text}
+              style={{ width: 120 }}
+              onChange={this.handleRoleChange}
+            >
+              <Option value="0">管理员</Option>
+              <Option value="1">普通用户</Option>
+              <Option value="2">付费用户</Option>
+            </Select>
+          );
+        }
       },
       {
         title: "操作",
@@ -31,7 +45,11 @@ class UserList extends React.Component {
             <span>
               <a onClick={this.onHandleEdit.bind(null, record._id)}>编辑</a>
               <Divider type="vertical" />
-              <a onClick={this.deleteArticle.bind(null, record._id)}>删除</a>
+              <a onClick={this.deleteUser.bind(null, record._id)}>删除</a>
+              <Divider type="vertical" />
+              <a onClick={this.setPermission.bind(null, record._id)}>
+                设置权限
+              </a>
             </span>
           );
         }
@@ -39,63 +57,80 @@ class UserList extends React.Component {
     ];
   }
   state = {
-    selectedRowKeys: [], // Check here to configure the default column
     loading: false,
+    visible: false,
+    privilegeData: [], //权限列表
     data: [] //表格数据
   };
 
   componentDidMount() {
-    // this.getArticleList();
+    this.getUserList();
   }
 
-  onSelectChange = selectedRowKeys => {
-    console.log("selectedRowKeys changed: ", selectedRowKeys);
-    this.setState({ selectedRowKeys });
+  //处理角色变更
+  handleRoleChange = roleId => {
+    const userId = localStorage.getItem("userId");
+    ApiUtil({ userId, roleId }, "/user/modify/role").then(res => {
+      message.success("操作成功!");
+    });
   };
 
   //查询列表
-  getArticleList = () => {
-    ApiUtil({}, "/news/list").then(res => {
-      this.setState({ data: res });
+  getUserList = () => {
+    ApiUtil({}, "/user/list", "GET").then(res => {
+      this.setState({ data: res.data });
     });
   };
 
-  //查询详情
-  getArticalDetail = id => {
-    this.props.history.push(`/admin/articleDetail/${id}`);
-  };
+  //编辑用户
+  onHandleEdit = userId => {};
 
-  //修改新闻
-  onHandleEdit = id => {
-    this.props.history.push(`/admin/articleAdd`, { id });
-  };
+  //删除用户
+  deleteUser = userId => {};
 
-  //删除新闻
-  deleteArticle = id => {
-    ApiUtil({ newsId: id }, "/news/delete").then(res => {
-      // this.getArticleList();
-      message.success("删除成功");
+  //设置权限
+  setPermission = userId => {
+    ApiUtil({}, "/privilege/list/all", "GET").then(res => {
+      this.setState({ privilegeData: res.data });
     });
+    this.setState({ visible: true });
   };
 
-  //查看评论列表
-  getCommentList = id => {
-    this.props.history.push(`/admin/commentList`, { id });
+  //关闭弹窗
+  handleCancel = () => {
+    this.setState({ visible: false });
+  };
+
+  onChangePermission = () => {};
+
+  //提交权限修改内容
+  handleOk = () => {
+    // ApiUtil({}, "/user/list","GET").then(res => {
+    //   this.setState({ data: res.data });
+    // });
   };
 
   render() {
-    const { loading, selectedRowKeys, data } = this.state;
-    const rowSelection = {
-      selectedRowKeys,
-      onChange: this.onSelectChange
-    };
-    const hasSelected = selectedRowKeys.length > 0;
-
+    const { loading, data, visible, privilegeData } = this.state;
+    console.log(privilegeData, "privilegeData");
     return (
       <Auth authId={Permission.USER_LIST}>
         <div style={{ width: "100%" }}>
           <Table columns={this.columns} dataSource={data} />
         </div>
+        {/* 权限设置 */}
+        <Modal
+          title="设置权限"
+          visible={visible}
+          onOk={this.handleOk}
+          onCancel={this.handleCancel}
+        >
+          <CheckboxGroup
+            options={privilegeData}
+            value={{ id: 0, privilegeValue: "新闻列表" }}
+            onChange={this.onChangePermission}
+          />
+        </Modal>
       </Auth>
     );
   }

@@ -1,11 +1,23 @@
 import React from "react";
 import ApiUtil from "utils/api";
-import { List, Avatar, Button, Spin, Icon, Tabs, Layout, Menu } from "antd";
+import {
+  List,
+  Avatar,
+  Button,
+  Spin,
+  Icon,
+  Tabs,
+  Layout,
+  Menu,
+  Tag
+} from "antd";
+import { getName, formatMsgTime } from "utils/util";
+import axios from "axios";
+import _ from "lodash";
+
 const TabPane = Tabs.TabPane;
 const { Header, Content } = Layout;
 const { SubMenu } = Menu;
-import axios from "axios";
-
 const fakeDataUrl =
   "https://randomuser.me/api/?results=5&inc=name,gender,email,nat&noinfo";
 
@@ -28,51 +40,17 @@ class NewsList extends React.Component {
     if (localStorage.getItem("userName")) {
       this.setState({ hasLogin: true });
     }
-
-    this.getData(res => {
-      this.setState({
-        loading: false,
-        data: res.results
-      });
-    });
+    this.getData("1");
   }
 
   //查询新闻列表
-  getData = callback => {
-    // ApiUtil({},"/news/list")
-    // .then(res=>{
-    //     callback(res);
-    // })
-    callback({
-      results: [
-        {
-          title: "我是标题",
-          id: 1,
-          name: { last: "zhang" },
-          content:
-            "Ant Design, a design language for background applications, is refined by Ant UED Team"
-        }
-      ]
-    });
-  };
-  onLoadMore = () => {
-    this.setState({
-      loadingMore: true
-    });
-    this.getData(res => {
-      const data = this.state.data.concat(res.results);
-      this.setState(
-        {
-          data,
-          loadingMore: false
-        },
-        () => {
-          // Resetting window's offsetTop so as to display react-virtualized demo underfloor.
-          // In real scene, you can using public method of react-virtualized:
-          // https://stackoverflow.com/questions/46700726/how-to-use-public-method-updateposition-of-react-virtualized
-          window.dispatchEvent(new Event("resize"));
-        }
-      );
+  getData = typeId => {
+    ApiUtil({ typeId }, "/news/list").then(res => {
+      // const newData = _.dropRightWhile(res.data,{typeId:this.state.keyOfList})
+      this.setState({
+        loading: false,
+        data: res.data
+      });
     });
   };
 
@@ -81,27 +59,17 @@ class NewsList extends React.Component {
     window.open(`http://localhost:8080/home/newsDetail/${id}`, "_blank");
   };
 
+  onHandleComplain = () => {
+    console.log("cc");
+  };
+
+  //处理列表筛选
+  handleListKeyChange = key => {
+    this.getData(key);
+  };
+
   render() {
-    const {
-      loading,
-      loadingMore,
-      showLoadingMore,
-      data,
-      hasLogin
-    } = this.state;
-    const loadMore = showLoadingMore ? (
-      <div
-        style={{
-          textAlign: "center",
-          marginTop: 12,
-          height: 32,
-          lineHeight: 32
-        }}
-      >
-        {loadingMore && <Spin />}
-        {!loadingMore && <Button onClick={this.onLoadMore}>加载更多</Button>}
-      </div>
-    ) : null;
+    const { loading, data, hasLogin } = this.state;
     return (
       <div>
         <Tabs
@@ -128,21 +96,41 @@ class NewsList extends React.Component {
             Content of Tab 3
           </TabPane>
         </Tabs>
+
+        <Tabs
+          defaultActiveKey="1"
+          onChange={this.handleListKeyChange}
+          style={{ marginTop: 30 }}
+        >
+          <TabPane tab="全部" key="1" />
+          <TabPane tab="政治" key="2" />
+          <TabPane tab="社会" key="3" />
+          <TabPane tab="娱乐" key="4" />
+          <TabPane tab="体育" key="5" />
+          <TabPane tab="明星" key="6" />
+          <TabPane tab="其他" key="7" />
+        </Tabs>
+
         <List
           itemLayout="vertical"
           size="large"
-          loadMore={loadMore}
           dataSource={data}
           renderItem={item => (
             <List.Item
-              onClick={this.getNewsDetail.bind(null, item.id)}
-              key={item.title}
+              key={item.id}
               actions={[
-                <IconText type="dislike-o" text="举报" />,
-                <IconText type="message" text="2" />
+                <a onClick={this.onHandleComplain}>
+                  <IconText type="dislike-o" text="举报" />
+                </a>,
+                <IconText
+                  type="clock-circle-o"
+                  text={formatMsgTime(item.addTime ? item.addTime : new Date())}
+                />,
+                <IconText type="eye-o" text={item.number} />
               ]}
               extra={
                 <img
+                  onClick={this.getNewsDetail.bind(null, item.id)}
                   width={272}
                   alt="logo"
                   src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
@@ -150,10 +138,16 @@ class NewsList extends React.Component {
               }
             >
               <List.Item.Meta
-                title={<a>{item.name.last}</a>}
-                description={item.content}
+                onClick={this.getNewsDetail.bind(null, item.id)}
+                title={
+                  <a>
+                    <Tag color="magenta">{getName(item.typeId)}</Tag>
+                    {item.title}
+                  </a>
+                }
+                description={item.summary}
               />
-              {item.content}
+              {/* {item.content} */}
             </List.Item>
           )}
         />

@@ -3,6 +3,7 @@ import { Layout, Menu, Icon, Input, Card, Avatar } from "antd";
 import { Link } from "react-router-dom";
 import Permission from "utils/permission";
 import { isAuth } from "component/Authority";
+import { getMenuKeys } from "utils/util";
 
 const { Header, Sider, Content } = Layout;
 const Search = Input.Search;
@@ -11,8 +12,20 @@ const SubMenu = Menu.SubMenu;
 
 class Index extends React.Component {
   state = {
-    collapsed: false
+    collapsed: false,
+    currentId: "1",
+    currentSub: "sub1"
   };
+
+  componentWillMount() {
+    const menu = getMenuKeys();
+    if (menu) {
+      this.setState({
+        currentSub: menu.subKey,
+        currentId: menu.key
+      });
+    }
+  }
 
   /**
    * 收起菜单栏
@@ -51,13 +64,15 @@ class Index extends React.Component {
   };
 
   render() {
+    const { currentId, currentSub } = this.state;
+    console.log(currentId, currentSub);
     return (
       <Layout className="components-layout-demo-custom-trigger">
         <Sider trigger={null} collapsible collapsed={this.state.collapsed}>
           <div className="logo" />
           <Menu
-            defaultSelectedKeys={["1"]}
-            defaultOpenKeys={["sub1"]}
+            defaultSelectedKeys={[currentId]}
+            defaultOpenKeys={[currentSub]}
             mode="inline"
             theme="dark"
             inlineCollapsed={this.state.collapsed}
@@ -87,7 +102,7 @@ class Index extends React.Component {
             {/* </SubMenu> */}
             {isAuth(Permission.USER_LIST) ? (
               <SubMenu
-                key="sub3"
+                key="sub2"
                 title={
                   <span>
                     <Icon type="appstore" />

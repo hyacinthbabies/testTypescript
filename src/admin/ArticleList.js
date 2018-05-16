@@ -3,6 +3,8 @@ import { Table, Divider, message } from "antd";
 import ApiUtil from "utils/api";
 import { Auth } from "component/Authority";
 import Permission from "utils/permission";
+import { getName, DateFormat } from "utils/util";
+import Omit from "component/Omit";
 
 class ArticleList extends React.Component {
   constructor(props) {
@@ -14,11 +16,10 @@ class ArticleList extends React.Component {
       },
       {
         title: "文章概要",
-        dataIndex: "summary"
-      },
-      {
-        title: "文章内容",
-        dataIndex: "content"
+        dataIndex: "summary",
+        render(text) {
+          return <Omit text={text} sizeWord={30} />;
+        }
       },
       {
         title: "作者名称",
@@ -26,11 +27,17 @@ class ArticleList extends React.Component {
       },
       {
         title: "文章日期",
-        dataIndex: "addTime"
+        dataIndex: "addTime",
+        render(text) {
+          return DateFormat(new Date(text), "yyyy-MM-dd HH:mm:ss");
+        }
       },
       {
         title: "文章类型",
-        dataIndex: "typeName"
+        dataIndex: "typeId",
+        render: text => {
+          return getName(text);
+        }
       },
       {
         title: "阅读数量",
@@ -41,13 +48,15 @@ class ArticleList extends React.Component {
         render: record => {
           return (
             <span>
-              <a onClick={this.onHandleEdit.bind(null, record._id)}>编辑</a>
+              <a onClick={this.onHandleEdit.bind(null, record.id)}>编辑</a>
               <Divider type="vertical" />
-              <a onClick={this.getArticalDetail.bind(null, record._id)}>详情</a>
+              <a onClick={this.getArticalDetail.bind(null, record.id)}>详情</a>
               <Divider type="vertical" />
-              <a onClick={this.deleteArticle.bind(null, record._id)}>删除</a>
+              <a onClick={this.deleteArticle.bind(null, record.id)}>置精</a>
               <Divider type="vertical" />
-              <a onClick={this.getCommentList.bind(null, record._id)}>
+              <a onClick={this.deleteArticle.bind(null, record.id)}>删除</a>
+              <Divider type="vertical" />
+              <a onClick={this.getCommentList.bind(null, record.id)}>
                 查看评论
               </a>
             </span>
@@ -57,24 +66,18 @@ class ArticleList extends React.Component {
     ];
   }
   state = {
-    selectedRowKeys: [], // Check here to configure the default column
     loading: false,
     data: [] //表格数据
   };
 
   componentDidMount() {
-    // this.getArticleList();
+    this.getArticleList();
   }
-
-  onSelectChange = selectedRowKeys => {
-    console.log("selectedRowKeys changed: ", selectedRowKeys);
-    this.setState({ selectedRowKeys });
-  };
 
   //查询列表
   getArticleList = () => {
     ApiUtil({}, "/news/list").then(res => {
-      this.setState({ data: res });
+      this.setState({ data: res.data });
     });
   };
 
@@ -90,8 +93,11 @@ class ArticleList extends React.Component {
 
   //删除新闻
   deleteArticle = id => {
-    ApiUtil({ newsId: id }, "/news/delete").then(res => {
-      // this.getArticleList();
+    ApiUtil(
+      { id },
+      `/news/delete?userId=${localStorage.getItem("userId")}`
+    ).then(res => {
+      this.getArticleList();
       message.success("删除成功");
     });
   };
@@ -102,21 +108,11 @@ class ArticleList extends React.Component {
   };
 
   render() {
-    const { loading, selectedRowKeys, data } = this.state;
-    const rowSelection = {
-      selectedRowKeys,
-      onChange: this.onSelectChange
-    };
-    const hasSelected = selectedRowKeys.length > 0;
-
+    const { loading, data } = this.state;
     return (
       <Auth authId={Permission.NEWS_LIST}>
-        <div style={{ width: "100%" }}>
-          <Table
-            rowSelection={rowSelection}
-            columns={this.columns}
-            dataSource={data}
-          />
+        <div style={{ width: "100%", margin: "2%" }}>
+          <Table columns={this.columns} dataSource={data} />
         </div>
       </Auth>
     );

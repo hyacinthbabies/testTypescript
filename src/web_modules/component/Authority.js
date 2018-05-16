@@ -19,13 +19,13 @@ const isAuth = authId => {
   }
   let authIds = [];
   if (window.localStorage.getItem("auth")) {
-    authIds = window.localStorage.getItem("auth");
+    authIds = window.localStorage.getItem("auth").split(",");
   }
 
   // 只要满足一个就标示具有该权限
   for (const userAuthId of ids) {
     for (const id of authIds) {
-      if (userAuthId === id) {
+      if (userAuthId == id) {
         return true;
       }
     }

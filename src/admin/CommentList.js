@@ -39,14 +39,15 @@ class CommentList extends React.Component {
     ];
   }
   state = {
-    selectedRowKeys: [], // Check here to configure the default column
     loading: false,
     data: [] //表格数据
   };
 
   componentDidMount() {
-    const { params: { id } } = this.props.match;
-    this.getCommentList(id);
+    const { state } = this.props.location;
+    if (state && state.id) {
+      this.getCommentList(state.id);
+    }
   }
 
   //获取评论列表
@@ -55,32 +56,24 @@ class CommentList extends React.Component {
       newsId: id
     };
     //查询列表
-    ApiUtil(param, "/news/review/list").then(res => {
-      this.setState({ data: res });
+    ApiUtil(param, "/news/review/list", "GET").then(res => {
+      this.setState({ data: res.data });
     });
   };
 
   deleteArticle = id => {
     ApiUtil({ articleId: id }, "/api/removeArticle").then(res => {
-      // this.getArticleList();
+      this.getCommentList();
       message.success("删除成功");
     });
   };
 
   render() {
-    const { loading, selectedRowKeys, data } = this.state;
-    const rowSelection = {
-      selectedRowKeys
-    };
-    const hasSelected = selectedRowKeys.length > 0;
+    const { loading, data } = this.state;
 
     return (
       <div style={{ width: "100%" }}>
-        <Table
-          rowSelection={rowSelection}
-          columns={this.columns}
-          dataSource={data}
-        />
+        <Table columns={this.columns} dataSource={data} />
       </div>
     );
   }

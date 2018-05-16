@@ -1,6 +1,8 @@
 import React from "react";
 import ApiUtil from "utils/api";
 import { List, Avatar, Button, Spin, Icon, Tabs, Layout, Menu } from "antd";
+import { Auth } from "component/Authority";
+import Permission from "utils/permission";
 const TabPane = Tabs.TabPane;
 const { Header, Content } = Layout;
 const { SubMenu } = Menu;
@@ -37,6 +39,10 @@ class Index extends React.Component {
     this.props.history.push("/login");
   };
 
+  goAdmin = () => {
+    this.props.history.push("/admin/articleList");
+  };
+
   render() {
     const { hasLogin } = this.state;
     return (
@@ -51,6 +57,14 @@ class Index extends React.Component {
         >
           {hasLogin ? (
             <span>
+              <Auth authId={Permission.MODIFY_NEWS}>
+                <a
+                  style={{ color: "#fff", marginRight: 10 }}
+                  onClick={this.goAdmin}
+                >
+                  后台管理
+                </a>
+              </Auth>
               <a style={{ color: "#fff", marginRight: 10 }}>
                 {localStorage.getItem("userName")}
               </a>

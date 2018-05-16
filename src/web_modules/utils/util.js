@@ -40,4 +40,56 @@ const formatMsgTime = timespan => {
   return timeSpanStr;
 };
 
-export { formatMsgTime };
+const getName = id => {
+  const arr = ["要闻", "社会", "娱乐", "体育", "军事", "明星", "其他"];
+  return arr[id];
+};
+
+let map = {};
+let headMap = { air: "1" };
+let menuMap = {
+  articleAdd: { subKey: "sub1", key: "1" },
+  articleList: { subKey: "sub1", key: "2" },
+  userList: { subKey: "sub2", key: "5" }
+};
+
+const getHeadKey = () => {
+  const url = window.location.href;
+  const head = url.split("/#/")[1].split("/")[0];
+  return headMap[head];
+};
+
+const getMenuKeys = () => {
+  const url = window.location.href;
+  const menu = url.split("/")[url.split("/").length - 1];
+  return menuMap[menu];
+};
+
+const DateFormat = (date, fmt) => {
+  if (date === undefined || date === "" || date === null) {
+    return "";
+  }
+  var o = {
+    "M+": date.getMonth() + 1,
+    "d+": date.getDate(),
+    "H+": date.getHours(),
+    "m+": date.getMinutes(),
+    "s+": date.getSeconds(),
+    "q+": Math.floor((date.getMonth() + 3) / 3),
+    S: date.getMilliseconds()
+  };
+  if (/(y+)/.test(fmt))
+    fmt = fmt.replace(
+      RegExp.$1,
+      (date.getFullYear() + "").substr(4 - RegExp.$1.length)
+    );
+  for (var k in o)
+    if (new RegExp("(" + k + ")").test(fmt))
+      fmt = fmt.replace(
+        RegExp.$1,
+        RegExp.$1.length == 1 ? o[k] : ("00" + o[k]).substr(("" + o[k]).length)
+      );
+  return fmt;
+};
+
+export { formatMsgTime, getName, getHeadKey, getMenuKeys, DateFormat };

@@ -24,6 +24,7 @@ class ArticleAdd extends React.Component {
     });
     const { state } = this.props.location;
     if (state && state.id) {
+      this.getArticleDetail(state.id);
       this.setState({ isEdit: true });
     }
   }
@@ -31,20 +32,20 @@ class ArticleAdd extends React.Component {
   //编辑页填充数据
   onEditValue = values => {
     this.props.form.setFieldsValue({
-      type: value.typeId,
+      type: values.typeId.toString(),
       title: values.title,
       author: values.addUserName,
       editor: values.content,
       summary: values.summary
     });
-    this.handle(values.articleContent);
+    this.handle(values.content);
   };
 
   //查询详情
   getArticleDetail = id => {
     this.setState({ loading: true });
-    ApiUtil({}, `/api/queryContent/${id}`).then(res => {
-      this.onEditValue(res);
+    ApiUtil({ newsId: id }, `/news/detail`, "GET").then(res => {
+      this.onEditValue(res.data);
       this.setState({ loading: false });
     });
   };
@@ -59,12 +60,13 @@ class ArticleAdd extends React.Component {
           summary: values["summary"],
           content: values["editor"],
           typeId: values["type"],
-          addUserId: localStorage.getItem("userId")
+          addUserId: parseInt(localStorage.getItem("userId"))
         };
         if (this.state.isEdit) {
           const { state } = this.props.location;
-          params.articleId = state.id;
-          ApiUtil(params, `/news/edit`, "POST").then(res => {
+          params.id = state.id;
+          const userId = parseInt(localStorage.getItem("userId"));
+          ApiUtil(params, `/news/edit?userId=${userId}`, "POST").then(res => {
             this.setState({ loading: false });
             message.success("修改成功");
           });
@@ -80,6 +82,7 @@ class ArticleAdd extends React.Component {
 
   onChangeEditor = val => {};
 
+  //改变富文本编辑器内容
   changeTxt = handle => {
     this.handle = handle;
   };

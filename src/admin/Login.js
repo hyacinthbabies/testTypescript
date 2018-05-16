@@ -22,7 +22,11 @@ class Login extends React.Component {
         };
         ApiUtil(param, "user/login")
           .then(res => {
+            if (res.retCode !== 0) {
+              return;
+            }
             //如果选择记住密码，则存到localstorage中
+            const userInfo = res.data;
             if (values["remember"]) {
               localStorage.setItem("userName", values["userName"]);
               localStorage.setItem("password", values["password"]);
@@ -30,10 +34,13 @@ class Login extends React.Component {
               localStorage.removeItem("userName");
               localStorage.removeItem("password");
             }
-            localStorage.setItem("userId", res.id);
+            localStorage.setItem("userId", userInfo.userEntity.id);
+            const authIds = userInfo.privilegeEntities.map(da => {
+              return da.id;
+            });
             //权限
-            localStorage.setItem("auth", res);
-            this.props.history.push("/admin/articleAdd");
+            localStorage.setItem("auth", authIds);
+            this.props.history.push("/home/newsList");
             message.success("登录成功");
           })
           .catch(err => {
