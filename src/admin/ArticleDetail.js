@@ -138,13 +138,15 @@ class ArticleDetail extends React.Component {
                     <List.Item
                       key={item.title}
                       // title={"管理员"}
-                      actions={[
-                        <IconText type="dislike" text="隐藏" />
-                        // <IconText
-                        //   type="clock-circle-o"
-                        //   text={formatMsgTime(new Date())}
-                        // />
-                      ]}
+                      actions={
+                        [
+                          // <IconText type="dislike" text="隐藏" />
+                          // <IconText
+                          //   type="clock-circle-o"
+                          //   text={formatMsgTime(new Date())}
+                          // />
+                        ]
+                      }
                     >
                       <List.Item.Meta
                         title={<a>{"管理员"}</a>}

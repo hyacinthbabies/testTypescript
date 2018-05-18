@@ -13,7 +13,7 @@ import {
 } from "antd";
 import { getName, formatMsgTime } from "utils/util";
 import axios from "axios";
-import _ from "lodash";
+import Constant from "utils/constant";
 
 const TabPane = Tabs.TabPane;
 const { Header, Content } = Layout;
@@ -30,8 +30,6 @@ const IconText = ({ type, text }) => (
 class NewsList extends React.Component {
   state = {
     loading: true,
-    loadingMore: false,
-    showLoadingMore: true,
     data: [],
     hasLogin: false
   };
@@ -40,11 +38,17 @@ class NewsList extends React.Component {
     if (localStorage.getItem("userName")) {
       this.setState({ hasLogin: true });
     }
-    this.getData("1");
+    this.getData("-1");
   }
 
   //查询新闻列表
   getData = typeId => {
+    if (typeId === "-1") {
+      typeId = "";
+    }
+    this.setState({
+      loading: true
+    });
     ApiUtil({ typeId }, "/news/list").then(res => {
       // const newData = _.dropRightWhile(res.data,{typeId:this.state.keyOfList})
       this.setState({
@@ -98,17 +102,18 @@ class NewsList extends React.Component {
         </Tabs>
 
         <Tabs
-          defaultActiveKey="1"
+          defaultActiveKey="-1"
           onChange={this.handleListKeyChange}
           style={{ marginTop: 30 }}
         >
-          <TabPane tab="全部" key="1" />
-          <TabPane tab="政治" key="2" />
-          <TabPane tab="社会" key="3" />
-          <TabPane tab="娱乐" key="4" />
-          <TabPane tab="体育" key="5" />
-          <TabPane tab="明星" key="6" />
-          <TabPane tab="其他" key="7" />
+          <TabPane tab="全部" key="-1" />
+          <TabPane tab="政治" key="0" />
+          <TabPane tab="社会" key="1" />
+          <TabPane tab="娱乐" key="2" />
+          <TabPane tab="体育" key="3" />
+          <TabPane tab="军事" key="4" />
+          <TabPane tab="明星" key="5" />
+          <TabPane tab="其他" key="6" />
         </Tabs>
 
         <List
@@ -119,21 +124,25 @@ class NewsList extends React.Component {
             <List.Item
               key={item.id}
               actions={[
-                <a onClick={this.onHandleComplain}>
-                  <IconText type="dislike-o" text="举报" />
-                </a>,
+                // <a onClick={this.onHandleComplain}>
+                //   <IconText type="dislike-o" text="举报" />
+                // </a>,
                 <IconText
                   type="clock-circle-o"
                   text={formatMsgTime(item.addTime ? item.addTime : new Date())}
                 />,
-                <IconText type="eye-o" text={item.number} />
+                <IconText type="eye-o" text={item.number ? item.number : 0} />
               ]}
               extra={
                 <img
                   onClick={this.getNewsDetail.bind(null, item.id)}
-                  width={272}
+                  width={150}
                   alt="logo"
-                  src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
+                  src={
+                    item.picId
+                      ? Constant.IMG_ROOT + "/" + item.picId
+                      : "https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
+                  }
                 />
               }
             >

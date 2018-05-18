@@ -15,6 +15,13 @@ class ArticleList extends React.Component {
         dataIndex: "id"
       },
       {
+        title: "标题",
+        dataIndex: "title",
+        render(text) {
+          return <Omit text={text} sizeWord={10} />;
+        }
+      },
+      {
         title: "文章概要",
         dataIndex: "summary",
         render(text) {

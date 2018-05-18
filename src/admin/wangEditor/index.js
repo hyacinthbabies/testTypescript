@@ -1,7 +1,7 @@
 import React from "react";
 import Editor from "wangeditor";
 import PropTypes from "prop-types";
-// import env from "config";
+import Constant from "utils/constant";
 import emotion from "./emotion.js";
 /**
  * 富文本编辑器
@@ -33,9 +33,9 @@ class WangEditor extends React.Component {
     //初始化编辑器
     const editor = new Editor(this.props.id);
     //请求上传图片的接口，放到服务器上
-    editor.config.uploadImgUrl = `${"env"}/files/upload`;
+    editor.config.uploadImgUrl = `${Constant.API_ROOT}/file/upload`;
     //图片名称，后端约定 file
-    editor.config.uploadImgFileName = "pic";
+    editor.config.uploadImgFileName = "file";
     //表情配置
     editor.config.emotions = {
       default: {
@@ -47,12 +47,14 @@ class WangEditor extends React.Component {
     editor.config.mapAk = "LsrQFnYCVKtv98xw4Dwi7qxYfmA2Xj7c";
     //将后台返回的图片地址插入编辑器
     editor.config.uploadImgFns.onload = function(resultText, xhr) {
-      const url = JSON.parse(resultText).url;
+      const url = JSON.parse(resultText).data;
       const originalName = editor.uploadImgOriginalName || "";
       editor.command(
         null,
         "insertHtml",
         '<img src="' +
+          Constant.IMG_ROOT +
+          "/" +
           url +
           '" alt="' +
           originalName +
