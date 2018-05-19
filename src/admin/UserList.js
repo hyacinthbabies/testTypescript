@@ -29,7 +29,7 @@ class UserList extends React.Component {
           return (
             <Select
               style={{ width: 120 }}
-              defaultValue={text ? text : "0"}
+              defaultValue={text ? text.toString() : "0"}
               onChange={this.onHandleRoleChange.bind(null, record.id)}
             >
               <Option value="1">管理员</Option>
