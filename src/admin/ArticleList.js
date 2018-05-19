@@ -59,7 +59,7 @@ class ArticleList extends React.Component {
               <Divider type="vertical" />
               <a onClick={this.getArticalDetail.bind(null, record.id)}>详情</a>
               <Divider type="vertical" />
-              <a onClick={this.deleteArticle.bind(null, record.id)}>置精</a>
+              <a onClick={this.setHotArticle.bind(null, record)}>设为热点</a>
               <Divider type="vertical" />
               <a onClick={this.deleteArticle.bind(null, record.id)}>删除</a>
               <Divider type="vertical" />
@@ -100,18 +100,36 @@ class ArticleList extends React.Component {
 
   //删除新闻
   deleteArticle = id => {
-    ApiUtil(
-      { id },
-      `/news/delete?userId=${localStorage.getItem("userId")}`
-    ).then(res => {
-      this.getArticleList();
-      message.success("删除成功");
-    });
+    ApiUtil({ id }, `/news/delete?userId=${localStorage.getItem("userId")}`)
+      .then(res => {
+        this.getArticleList();
+        message.success("删除成功");
+      })
+      .catch(err => {
+        this.setState({ loading: false });
+      });
   };
 
   //查看评论列表
   getCommentList = id => {
     this.props.history.push(`/admin/commentList`, { id });
+  };
+
+  //设为热点新闻
+  setHotArticle = record => {
+    ApiUtil(
+      {},
+      `/news/set/hot?newsId=${record.id}&typeId=${
+        record.typeId
+      }&userId=${localStorage.getItem("userId")}`
+    )
+      .then(res => {
+        this.getArticleList();
+        message.success("设置成功");
+      })
+      .catch(err => {
+        message.error("设置失败");
+      });
   };
 
   render() {

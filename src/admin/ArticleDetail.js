@@ -25,7 +25,7 @@ class ArticleDetail extends React.Component {
     ApiUtil({ newsId: id }, `/news/detail`, "GET").then(res => {
       //查询评论
       this.getArticleComment(id);
-      this.setState({ newsDetail: res.data, loading: false });
+      this.setState({ newsDetail: res.data ? res.data : {}, loading: false });
       $("#content").html(res.data.content);
     });
   };
@@ -33,19 +33,16 @@ class ArticleDetail extends React.Component {
   //查询评论
   getArticleComment = id => {
     this.setState({ currentId: id, loading: true });
-    ApiUtil({ newsId: id }, `/news/review/list`, "GET").then(res => {
-      this.setState({ commentList: res.data, loading: false });
-    });
-  };
-
-  //查询新闻列表
-  getData = callback => {
-    ApiUtil({}, "/news/list", "GET").then(res => {
-      this.setState({
-        loading: false,
-        commentList: res.data
+    ApiUtil({ newsId: id }, `/news/review/list`, "GET")
+      .then(res => {
+        this.setState({
+          commentList: res.data ? res.data : [],
+          loading: false
+        });
+      })
+      .catch(err => {
+        this.setState({ loading: false });
       });
-    });
   };
 
   handleSubmit = e => {
@@ -60,11 +57,15 @@ class ArticleDetail extends React.Component {
             content: values["comment"],
             addUserId: localStorage.getItem("userId")
           };
-          ApiUtil(params, `/news/review/edit`).then(res => {
-            //查询评论
-            this.getArticleComment(id);
-            this.setState({ loading: false });
-          });
+          ApiUtil(params, `/news/review/edit`)
+            .then(res => {
+              //查询评论
+              this.getArticleComment(id);
+              this.setState({ loading: false });
+            })
+            .catch(err => {
+              this.setState({ loading: false });
+            });
         } else {
           console.log("不能为空");
         }
@@ -99,7 +100,7 @@ class ArticleDetail extends React.Component {
               <span>{newsDetail.addUserName}</span>
               <span>
                 {formatMsgTime(
-                  newsDetail.addTime ? newsDetail.addTime : new Date()
+                  newsDetail.addTime ? new Date(newsDetail.addTime) : new Date()
                 )}
               </span>
             </div>

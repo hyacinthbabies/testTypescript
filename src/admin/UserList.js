@@ -5,6 +5,7 @@ import { Auth } from "component/Authority";
 import Permission from "utils/permission";
 const CheckboxGroup = Checkbox.Group;
 const Option = Select.Option;
+
 class UserList extends React.Component {
   constructor(props) {
     super(props);
@@ -15,25 +16,24 @@ class UserList extends React.Component {
       },
       {
         title: "用户姓名",
-        dataIndex: "summary"
+        dataIndex: "name"
       },
       {
         title: "手机号",
-        dataIndex: "content"
+        dataIndex: "phone"
       },
       {
         title: "角色",
         dataIndex: "roleId",
-        render(text) {
+        render: (text, record) => {
           return (
             <Select
-              defaultValue={text}
               style={{ width: 120 }}
-              onChange={this.handleRoleChange}
+              defaultValue={text ? text : "0"}
+              onChange={this.onHandleRoleChange.bind(null, record.id)}
             >
-              <Option value="0">管理员</Option>
-              <Option value="1">普通用户</Option>
-              <Option value="2">付费用户</Option>
+              <Option value="1">管理员</Option>
+              <Option value="2">普通用户</Option>
             </Select>
           );
         }
@@ -42,15 +42,7 @@ class UserList extends React.Component {
         title: "操作",
         render: record => {
           return (
-            <span>
-              <a onClick={this.onHandleEdit.bind(null, record._id)}>编辑</a>
-              <Divider type="vertical" />
-              <a onClick={this.deleteUser.bind(null, record._id)}>删除</a>
-              <Divider type="vertical" />
-              <a onClick={this.setPermission.bind(null, record._id)}>
-                设置权限
-              </a>
-            </span>
+            <a onClick={this.setPermission.bind(null, record.id)}>设置权限</a>
           );
         }
       }
@@ -59,7 +51,9 @@ class UserList extends React.Component {
   state = {
     loading: false,
     visible: false,
+    roleId: "",
     privilegeData: [], //权限列表
+    personalPrivil: [], //个人权限列表
     data: [] //表格数据
   };
 
@@ -68,11 +62,13 @@ class UserList extends React.Component {
   }
 
   //处理角色变更
-  handleRoleChange = roleId => {
-    const userId = localStorage.getItem("userId");
-    ApiUtil({ userId, roleId }, "/user/modify/role").then(res => {
-      message.success("操作成功!");
-    });
+  onHandleRoleChange = (userId, roleId) => {
+    ApiUtil({}, `/user/modify/role?userId=${userId}&roleId=${roleId}`).then(
+      res => {
+        message.success("操作成功!");
+        this.getUserList();
+      }
+    );
   };
 
   //查询列表
@@ -89,11 +85,12 @@ class UserList extends React.Component {
   deleteUser = userId => {};
 
   //设置权限
-  setPermission = userId => {
+  setPermission = roleId => {
+    this.getPersonalPrivilge();
     ApiUtil({}, "/privilege/list/all", "GET").then(res => {
       this.setState({ privilegeData: res.data });
     });
-    this.setState({ visible: true });
+    this.setState({ visible: true, roleId });
   };
 
   //关闭弹窗
@@ -101,18 +98,52 @@ class UserList extends React.Component {
     this.setState({ visible: false });
   };
 
-  onChangePermission = () => {};
+  onChangePermission = values => {
+    this.setState({
+      personalPrivil: values
+    });
+  };
 
   //提交权限修改内容
   handleOk = () => {
-    // ApiUtil({}, "/user/list","GET").then(res => {
-    //   this.setState({ data: res.data });
-    // });
+    let param = {
+      roleId: this.state.roleId,
+      privilegeIds: this.state.personalPrivil
+    };
+    ApiUtil(
+      param,
+      `/role/modify/privilege?userId=${localStorage.getItem("userId")}`
+    ).then(res => {
+      message.success("操作成功!");
+      this.handleCancel();
+      this.getUserList();
+    });
+  };
+
+  //获取个人权限
+  getPersonalPrivilge = () => {
+    ApiUtil(
+      { userId: localStorage.getItem("userId") },
+      "/privilege/list/personal",
+      "GET"
+    ).then(res => {
+      //设置权限初始值
+      const newPersonalPrivil = res.data.map(pri => {
+        return pri.id;
+      });
+      this.setState({ personalPrivil: newPersonalPrivil });
+    });
+    this.setState({ visible: true });
   };
 
   render() {
-    const { loading, data, visible, privilegeData } = this.state;
-    console.log(privilegeData, "privilegeData");
+    const {
+      loading,
+      data,
+      visible,
+      privilegeData,
+      personalPrivil
+    } = this.state;
     return (
       <Auth authId={Permission.USER_LIST}>
         <div style={{ width: "100%" }}>
@@ -126,10 +157,17 @@ class UserList extends React.Component {
           onCancel={this.handleCancel}
         >
           <CheckboxGroup
-            options={privilegeData}
-            value={{ id: 0, privilegeValue: "新闻列表" }}
+            value={personalPrivil}
             onChange={this.onChangePermission}
-          />
+          >
+            {privilegeData.map(priv => {
+              return (
+                <Checkbox value={priv.id} key={priv.id}>
+                  {priv.name}
+                </Checkbox>
+              );
+            })}
+          </CheckboxGroup>
         </Modal>
       </Auth>
     );

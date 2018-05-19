@@ -17,16 +17,22 @@ class Register extends React.Component {
         ApiUtil(param, "user/register").then(res => {
           message.success("注册成功,现在登录！");
           const param = {
-            phone: values["userName"],
+            phone: values["phone"],
             password: values["password"]
           };
-          ApiUtil(param, "user/login").then(res => {
-            localStorage.setItem("userId", res.id);
-            //权限
-            localStorage.setItem("auth", res);
-            this.props.history.push("/admin/articleAdd");
-            message.success("登录成功");
-          });
+          ApiUtil(param, "user/login")
+            .then(res => {
+              localStorage.setItem("userId", res.id);
+              localStorage.setItem("userName", values["userName"]);
+              localStorage.setItem("password", values["password"]);
+              //权限
+              localStorage.setItem("auth", res);
+              this.props.history.push("/home/newsList");
+              message.success("登录成功");
+            })
+            .catch(err => {
+              message.error("登录失败");
+            });
         });
       }
     });

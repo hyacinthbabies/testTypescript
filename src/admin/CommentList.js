@@ -7,34 +7,24 @@ class CommentList extends React.Component {
     super(props);
     this.columns = [
       {
-        title: "文章编号",
-        dataIndex: "_id"
+        title: "编号",
+        dataIndex: "id"
+      },
+      {
+        title: "新闻编号",
+        dataIndex: "newsId"
       },
       {
         title: "评论内容",
-        dataIndex: "articleName"
+        dataIndex: "content"
       },
       {
         title: "作者名称",
-        dataIndex: "authorName"
-      },
-      {
-        title: "文章日期",
-        dataIndex: "articleDate"
+        dataIndex: "addUserName"
       },
       {
         title: "文章类型",
         dataIndex: "articleType"
-      },
-      {
-        title: "操作",
-        render: record => {
-          return (
-            <span>
-              <a onClick={this.deleteArticle.bind(null, record._id)}>删除</a>
-            </span>
-          );
-        }
       }
     ];
   }
@@ -58,13 +48,6 @@ class CommentList extends React.Component {
     //查询列表
     ApiUtil(param, "/news/review/list", "GET").then(res => {
       this.setState({ data: res.data });
-    });
-  };
-
-  deleteArticle = id => {
-    ApiUtil({ articleId: id }, "/api/removeArticle").then(res => {
-      this.getCommentList();
-      message.success("删除成功");
     });
   };
 

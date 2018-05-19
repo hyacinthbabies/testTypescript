@@ -49,10 +49,14 @@ class ArticleAdd extends React.Component {
   //查询详情
   getArticleDetail = id => {
     this.setState({ loading: true });
-    ApiUtil({ newsId: id }, `/news/detail`, "GET").then(res => {
-      this.onEditValue(res.data);
-      this.setState({ loading: false });
-    });
+    ApiUtil({ newsId: id }, `/news/detail`, "GET")
+      .then(res => {
+        this.onEditValue(res.data);
+        this.setState({ loading: false });
+      })
+      .catch(err => {
+        this.setState({ loading: false });
+      });
   };
 
   //提交文章
@@ -78,9 +82,13 @@ class ArticleAdd extends React.Component {
           });
         } else {
           params.addTime = new Date();
-          ApiUtil(params, `/news/edit?userId=${userId}`, "POST").then(res => {
-            message.success("保存成功");
-          });
+          ApiUtil(params, `/news/edit?userId=${userId}`, "POST")
+            .then(res => {
+              message.success("保存成功");
+            })
+            .catch(err => {
+              message.error("操作失败");
+            });
         }
       }
     });

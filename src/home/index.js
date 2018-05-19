@@ -84,9 +84,7 @@ class Index extends React.Component {
             </a>
           )}
         </div>
-        <Content style={{ margin: "20px 300px" }}>
-          {this.props.children}
-        </Content>
+        <Content style={{ margin: "20px 30%" }}>{this.props.children}</Content>
       </div>
     );
   }
