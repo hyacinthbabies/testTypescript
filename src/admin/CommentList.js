@@ -56,6 +56,7 @@ class CommentList extends React.Component {
 
     return (
       <div style={{ width: "100%" }}>
+        <p style={{ margin: 10 }}>评论列表</p>
         <Table columns={this.columns} dataSource={data} />
       </div>
     );
